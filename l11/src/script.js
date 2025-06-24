@@ -23,7 +23,7 @@ gui._closeFolders = true;
  */
 const textureLoader = new THREE.TextureLoader();
 const doorAlphaTexture = textureLoader.load("/textures/door/alpha.jpg");
-const doorAOTexture = textureLoader.load("/textures/door/ambienOcclusion.jpg");
+const doorAOTexture = textureLoader.load("/textures/door/ambientOcclusion.jpg");
 const doorColorTexture = textureLoader.load("/textures/door/color.jpg");
 doorColorTexture.colorSpace = THREE.SRGBColorSpace;
 const doorHeightTexture = textureLoader.load("/textures/door/height.jpg");
@@ -76,28 +76,92 @@ matCapTexture.colorSpace = THREE.SRGBColorSpace;
 // firstGradientTexture.generateMipmaps = false;
 // material.gradientMap = firstGradientTexture;
 
+// // MeshStandardMaterial
+// const material = new THREE.MeshStandardMaterial();
+// material.side = THREE.DoubleSide;
+// material.metalness = 1;
+// gui.add(material, "metalness", 0, 1);
+// material.roughness = 1;
+// gui.add(material, "roughness", 0, 1);
+
+// material.map = doorColorTexture;
+// material.aoMap = doorAOTexture;
+// material.displacementMap = doorHeightTexture;
+// material.displacementScale = 0.05;
+// material.metalnessMap = doorMetalnessTexture;
+// material.roughnessMap = doorRoughnessTexture;
+// material.normalMap = doorNormalTexture;
+// material.normalScale.set(0.5, 0.5);
+// material.transparent = true;
+// material.alphaMap = doorAlphaTexture;
+// material.wireframe = true;
+
 // MeshStandardMaterial
-const material = new THREE.MeshStandardMaterial();
+const material = new THREE.MeshPhysicalMaterial();
 material.side = THREE.DoubleSide;
-material.metalness = 0.7;
+material.metalness = 1;
 gui.add(material, "metalness", 0, 1);
-material.roughness = 0.2;
+material.roughness = 1;
 gui.add(material, "roughness", 0, 1);
 
 material.map = doorColorTexture;
 material.aoMap = doorAOTexture;
-// material.aoMapIntensity = 1;
+material.displacementMap = doorHeightTexture;
+material.displacementScale = 0.05;
+material.metalnessMap = doorMetalnessTexture;
+material.roughnessMap = doorRoughnessTexture;
+material.normalMap = doorNormalTexture;
+material.normalScale.set(0.5, 0.5);
+material.transparent = true;
+material.alphaMap = doorAlphaTexture;
+
+// Clearcoat
+// material.clearcoat = 1;
+// material.clearcoatRoughness = 0;
+// gui.add(material, "clearcoat").min(0).max(1).step(0.0001);
+// gui.add(material, "clearcoatRoughness").min(0).max(1).step(0.0001);
+
+// Sheen
+// material.sheen = 1;
+// material.sheenRoughness = 0.25;
+// material.sheenColor.set(1, 1, 1);
+
+// gui.add(material, "sheen").min(0).max(1).step(0.0001);
+// gui.add(material, "sheenRoughness").min(0).max(1).step(0.0001);
+// gui.addColor(material, "sheenColor");
+
+// Iridescence
+// material.iridescence = 1;
+// material.iridescenceIOR = 1;
+// material.iridescenceThicknessRange = [0.1, 0.2];
+
+// gui.add(material, "iridescence").min(0).max(1).step(0.0001);
+// gui.add(material, "iridescenceIOR").min(1).max(2.33).step(0.0001);
+// gui.add(material.iridescenceThicknessRange, "0").min(1).max(1000).step(1);
+// gui.add(material.iridescenceThicknessRange, "1").min(0).max(1000).step(1);
+
+//Transmission
+material.transmission = 1;
+material.ior = 1.5;
+material.thickness = 0.5;
+
+gui.add(material, "transmission").min(0).max(1).step(0.0001);
+gui.add(material, "ior").min(1).max(2.33).step(0.0001);
+gui.add(material, "thickness").min(0).max(1).step(0.0001);
 
 const sphereMesh = new THREE.Mesh(
-  new THREE.SphereGeometry(0.5, 32, 32),
+  new THREE.SphereGeometry(0.5, 64, 64),
   material
 );
 sphereMesh.position.x = -2;
 
-const planeMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material);
+const planeMesh = new THREE.Mesh(
+  new THREE.PlaneGeometry(1, 1, 100, 100),
+  material
+);
 
 const torusMesh = new THREE.Mesh(
-  new THREE.TorusGeometry(0.5, 0.2, 32, 32),
+  new THREE.TorusGeometry(0.5, 0.2, 64, 128),
   material
 );
 torusMesh.position.x = 2;
@@ -107,9 +171,9 @@ scene.add(sphereMesh, planeMesh, torusMesh);
 /**
  * Lights
  */
-const pointLight = new THREE.PointLight(0xffffff, 30);
-pointLight.position.set(2, 3, 4);
-scene.add(pointLight);
+// const pointLight = new THREE.PointLight(0xffffff, 30);
+// pointLight.position.set(2, 3, 4);
+// scene.add(pointLight);
 
 /**
  * Environment Map
@@ -142,6 +206,8 @@ window.addEventListener("resize", () => {
   // Update renderer
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0; //
 });
 
 /**
